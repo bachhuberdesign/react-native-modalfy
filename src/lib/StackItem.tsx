@@ -1,17 +1,17 @@
+import React, { memo, ReactNode, useEffect, useRef, useState } from 'react'
 import { Animated, StyleSheet } from 'react-native'
-import { useMemo, useCallback } from 'use-memo-one'
-import React, { ReactNode, useEffect, useRef, memo } from 'react'
-import { State, Directions, FlingGestureHandler } from 'react-native-gesture-handler'
+import { Directions, FlingGestureHandler, State } from 'react-native-gesture-handler'
+import { useCallback, useMemo } from 'use-memo-one'
 
 import type {
-  SharedProps,
-  ModalfyParams,
-  ModalStackItem,
-  ModalEventName,
   ModalEventCallback,
-  ModalPendingClosingAction,
-  ModalOnCloseEventCallback,
+  ModalEventName,
+  ModalfyParams,
   ModalOnAnimateEventCallback,
+  ModalOnCloseEventCallback,
+  ModalPendingClosingAction,
+  ModalStackItem,
+  SharedProps,
 } from '../types'
 
 import { getStackItemOptions, vh } from '../utils'
@@ -46,6 +46,7 @@ const StackItem = <P extends ModalfyParams>({
   wasOpenCallbackCalled,
   wasClosedByBackdropPress,
 }: Props<P>) => {
+  const [animating, setAnimating] = useState(false)
   const { animatedValue, translateY } = useMemo(
     () => ({
       animatedValue: new Animated.Value(-1),
@@ -125,14 +126,18 @@ const StackItem = <P extends ModalfyParams>({
           useNativeDriver: true,
           ...(closeModalCallback ? animateOutConfig : animateInConfig),
         }).start(({ finished }) => {
+          setAnimating(false)
+
           if (finished) {
             closeModalCallback?.(stackItem)
             modalStackItemCallback?.()
           }
         })
+
+        setAnimating(true)
       }
     },
-    [stackItem, animationIn, animationOut, animatedValue, animateInConfig, animateOutConfig],
+    [stackItem, animationIn, animationOut, animatedValue, animateInConfig, animateOutConfig, setAnimating],
   )
 
   const closeStackItem = useCallback(
@@ -230,7 +235,7 @@ const StackItem = <P extends ModalfyParams>({
     const removeAllListeners = () => clearListeners(stackItem.hash)
 
     return (
-      <Animated.View pointerEvents="box-none" style={{ transform: [{ translateY }] }}>
+      <Animated.View pointerEvents={animating ? 'none' : 'box-none'} style={{ transform: [{ translateY }] }}>
         <FlingGestureHandler
           direction={verticalPosition === 'top' ? Directions.UP : verticalPosition === 'bottom' ? Directions.DOWN : -1}
           onHandlerStateChange={onFling}>

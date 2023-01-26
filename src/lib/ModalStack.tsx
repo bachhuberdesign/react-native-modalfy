@@ -1,16 +1,17 @@
+import React, { memo, useEffect, useState } from 'react'
+import { Animated, Easing, Platform, StyleSheet, TouchableWithoutFeedback } from 'react-native'
 import { useCallback, useMemo } from 'use-memo-one'
-import React, { useEffect, useState, memo } from 'react'
-import { Easing, Animated, StyleSheet, TouchableWithoutFeedback, Platform } from 'react-native'
 
-import type { SharedProps, ModalfyParams, ModalStackItem, ModalPendingClosingAction } from '../types'
+import type { ModalfyParams, ModalPendingClosingAction, ModalStackItem, SharedProps } from '../types'
 
 import StackItem from './StackItem'
 
 import { defaultOptions, getStackItemOptions, sh } from '../utils'
 
-type Props<P> = SharedProps<P>
+type Props<P extends ModalfyParams> = SharedProps<P>
 
 const ModalStack = <P extends ModalfyParams>(props: Props<P>) => {
+  const [animating, setAnimating] = useState(false)
   const { stack } = props
 
   const [hasChangedBackdropColor, setBackdropColorStatus] = useState(false)
@@ -58,7 +59,10 @@ const ModalStack = <P extends ModalfyParams>(props: Props<P>) => {
         easing: Easing.in(Easing.ease),
         duration: backdropAnimationDuration,
         useNativeDriver: true,
-      }).start()
+      }).start(() => {
+        setAnimating(false)
+      })
+      setAnimating(true)
     } else hideBackdrop()
   }, [backdropAnimationDuration, opacity, stack.openedItemsSize, translateY])
 
@@ -110,7 +114,7 @@ const ModalStack = <P extends ModalfyParams>(props: Props<P>) => {
       stack.openedItemsSize && backdropColor ? backdropColor : hasChangedBackdropColor ? 'transparent' : 'black'
 
     return (
-      <TouchableWithoutFeedback onPress={onPress}>
+      <TouchableWithoutFeedback onPress={animating ? () => {} : onPress}>
         <Animated.View
           style={[
             styles.backdrop,
