@@ -1,20 +1,20 @@
 import { BackHandler } from 'react-native'
 
 import type {
-  ModalfyParams,
-  ModalStackItem,
-  ModalStateListener,
-  ModalInternalState,
-  ModalStateSubscriber,
   ModalContextProvider,
-  ModalStateSubscription,
-  ModalStateEqualityChecker,
+  ModalInternalState,
   ModalPendingClosingAction,
-  ModalState as ModalStateType,
+  ModalStackItem,
+  ModalStateEqualityChecker,
+  ModalStateListener,
   ModalStatePendingClosingAction,
+  ModalStateSubscriber,
+  ModalStateSubscription,
+  ModalState as ModalStateType,
+  ModalfyParams,
 } from '../types'
 
-import { invariant, getStackItemOptions, defaultOptions } from '../utils'
+import { defaultOptions, getStackItemOptions, invariant } from '../utils'
 
 const createModalState = (): ModalStateType<any> => {
   let state: ModalInternalState<any> = {
@@ -112,6 +112,14 @@ const createModalState = (): ModalStateType<any> => {
 
     if (!currentModal && isCalledOutsideOfContext) {
       BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+    }
+
+    if (modalName === currentModal) {
+      if (__DEV__) {
+        console.log(`Trying to open a duplicate modal, ignoring: ${modalName}`)
+      }
+
+      return
     }
 
     setState<P>(currentState => ({

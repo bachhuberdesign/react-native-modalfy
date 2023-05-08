@@ -1,6 +1,6 @@
 {
   "name": "react-native-modalfy-ts-fix",
-  "version": "3.3.3",
+  "version": "3.3.4",
   "description": "Modal citizen of React Native",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
