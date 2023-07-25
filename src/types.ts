@@ -10,7 +10,7 @@ import type { Animated, ViewStyle } from 'react-native'
 
 export type ModalfyParams = { [key: string]: any }
 
-export type ModalTransitionValue = Animated.AnimatedInterpolation | string | number | undefined | null
+export type ModalTransitionValue = any | string | number | undefined | null
 
 export type ModalTransitionOptions = (animatedValue: Animated.Value) => {
   [key: string]:
